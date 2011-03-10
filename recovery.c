@@ -687,13 +687,11 @@ wipe_data(int confirm) {
         erase_volume("/datadata");
     }
    // erase_volume("/sd-ext");
-    ui_print(" ");
-    ui_print("PARTICION EXT/2/3/4 NO SE FORMATEA.");
-    ui_print("Asi se conservan las aplicaciones ");
-    ui_print("Si deseas formatearla, hazlo manualmente");
-    ui_print(" ");
+    ui_print("PARTICION EXT/2/3/4 NO SE FORMATEA.\n");
+    ui_print("Asi se conservan las aplicaciones\n");
+    ui_print("Si deseas formatearla, hazlo manualmente\n");
     erase_volume("/sdcard/.android_secure");
-    ui_print("Wipe de datos completo.\n");
+    ui_print("Wipe de datos completo!!.\n");
 }
 
 static void
