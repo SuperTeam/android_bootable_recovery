@@ -22,15 +22,15 @@
 
 char* MENU_HEADERS[] = { NULL };
 
-char* MENU_ITEMS[] = { "reboot system now",
-                       "apply update from sdcard",
-                       "wipe data/factory reset",
-                       "wipe cache partition",
-                       "install zip from sdcard",
-                       "backup and restore",
-                       "mounts and storage",
-                       "advanced",
-                       "power off",
+char* MENU_ITEMS[] = { "Reinicia el sistema ahora",
+                       "Aplica update desde la sdcard",
+                       "Wipe data/reset de fabrica (No formatea la Ext4)",
+                       "Wipe particion cache",
+                       "Instala zip desde la sdcard",
+                       "Backup and restore",
+                       "Montar y USB",
+                       "Avanzado",
+                       "Apagar el telefono",
                        NULL };
 
 int device_recovery_start() {

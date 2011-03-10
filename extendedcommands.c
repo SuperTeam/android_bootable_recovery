@@ -47,18 +47,18 @@ void
 toggle_signature_check()
 {
     signature_check_enabled = !signature_check_enabled;
-    ui_print("Signature Check: %s\n", signature_check_enabled ? "Enabled" : "Disabled");
+    ui_print("Control de firma: %s\n", signature_check_enabled ? "Activado" : "Desactivado");
 }
 
 void toggle_script_asserts()
 {
     script_assert_enabled = !script_assert_enabled;
-    ui_print("Script Asserts: %s\n", script_assert_enabled ? "Enabled" : "Disabled");
+    ui_print("Afirma script: %s\n", script_assert_enabled ? "Activado" : "Desactivado");
 }
 
 int install_zip(const char* packagefilepath)
 {
-    ui_print("\n-- Installing: %s\n", packagefilepath);
+    ui_print("\n-- Instalando: %s\n", packagefilepath);
     if (device_flash_type() == MTD) {
         set_sdcard_update_bootloader_message();
     }
@@ -66,18 +66,18 @@ int install_zip(const char* packagefilepath)
     ui_reset_progress();
     if (status != INSTALL_SUCCESS) {
         ui_set_background(BACKGROUND_ICON_ERROR);
-        ui_print("Installation aborted.\n");
+        ui_print("Instalacion abortada.\n");
         return 1;
     }
     ui_set_background(BACKGROUND_ICON_NONE);
-    ui_print("\nInstall from sdcard complete.\n");
+    ui_print("\nInstalacion desde la sdcard completa.\n");
     return 0;
 }
 
-char* INSTALL_MENU_ITEMS[] = {  "apply /sdcard/update.zip",
-                                "choose zip from sdcard",
-                                "toggle signature verification",
-                                "toggle script asserts",
+char* INSTALL_MENU_ITEMS[] = {  "Aplica /sdcard/update.zip",
+                                "Escoje zip desde la sdcard",
+                                "Cambia verificacion de firma",
+                                "Cambia control de scripts",
                                 NULL };
 #define ITEM_APPLY_SDCARD     0
 #define ITEM_CHOOSE_ZIP       1
@@ -86,7 +86,7 @@ char* INSTALL_MENU_ITEMS[] = {  "apply /sdcard/update.zip",
 
 void show_install_update_menu()
 {
-    static char* headers[] = {  "Apply update from .zip file on SD card",
+    static char* headers[] = {  "Aplica update desde archivo .zip en la SD card",
                                 "",
                                 NULL
     };
@@ -103,7 +103,7 @@ void show_install_update_menu()
                 break;
             case ITEM_APPLY_SDCARD:
             {
-                if (confirm_selection("Confirm install?", "Yes - Install /sdcard/update.zip"))
+                if (confirm_selection("Confirma instalacion?", "Si - Instala /sdcard/update.zip"))
                     install_zip(SDCARD_UPDATE_FILE);
                 break;
             }
@@ -145,7 +145,7 @@ char** gather_files(const char* directory, const char* fileExtensionOrDirectory,
 
     dir = opendir(directory);
     if (dir == NULL) {
-        ui_print("Couldn't open directory.\n");
+        ui_print("No puedo abrir el directorio.\n");
         return NULL;
     }
 
@@ -207,7 +207,7 @@ char** gather_files(const char* directory, const char* fileExtensionOrDirectory,
     }
 
     if(closedir(dir) < 0) {
-        LOGE("Failed to close directory.");
+        LOGE("Fallo al cerrar el directorio.");
     }
 
     if (total==0) {
@@ -251,7 +251,7 @@ char* choose_file_menu(const char* directory, const char* fileExtensionOrDirecto
     int total = numDirs + numFiles;
     if (total == 0)
     {
-        ui_print("No files found.\n");
+        ui_print("No hay archivos.\n");
     }
     else
     {
@@ -301,11 +301,11 @@ char* choose_file_menu(const char* directory, const char* fileExtensionOrDirecto
 void show_choose_zip_menu()
 {
     if (ensure_path_mounted("/sdcard") != 0) {
-        LOGE ("Can't mount /sdcard\n");
+        LOGE ("No puedo montar /sdcard\n");
         return;
     }
 
-    static char* headers[] = {  "Choose a zip to apply",
+    static char* headers[] = {  "Escoje un zip a aplicar",
                                 "",
                                 NULL
     };
@@ -313,9 +313,9 @@ void show_choose_zip_menu()
     char* file = choose_file_menu("/sdcard/", ".zip", headers);
     if (file == NULL)
         return;
-    static char* confirm_install  = "Confirm install?";
+    static char* confirm_install  = "Confirma instalacion?";
     static char confirm[PATH_MAX];
-    sprintf(confirm, "Yes - Install %s", basename(file));
+    sprintf(confirm, "Si - Instala %s", basename(file));
     if (confirm_selection(confirm_install, confirm))
         install_zip(file);
 }
@@ -323,11 +323,11 @@ void show_choose_zip_menu()
 void show_nandroid_restore_menu()
 {
     if (ensure_path_mounted("/sdcard") != 0) {
-        LOGE ("Can't mount /sdcard\n");
+        LOGE ("No puedo montar /sdcard\n");
         return;
     }
 
-    static char* headers[] = {  "Choose an image to restore",
+    static char* headers[] = {  "Escoje una imagen para restaurar",
                                 "",
                                 NULL
     };
@@ -336,7 +336,7 @@ void show_nandroid_restore_menu()
     if (file == NULL)
         return;
 
-    if (confirm_selection("Confirm restore?", "Yes - Restore"))
+    if (confirm_selection("Confirma restauracion?", "Si - Restaura"))
         nandroid_restore(file, 1, 1, 1, 1, 1, 0);
 }
 
@@ -358,14 +358,14 @@ void show_mount_usb_storage_menu()
         close(fd);
         return -1;
     }
-    static char* headers[] = {  "USB Mass Storage device",
-                                "Leaving this menu unmount",
-                                "your SD card from your PC.",
+    static char* headers[] = {  "Dispositivo USB",
+                                "Al salir de este menu se desmonta",
+                                "tu SD card de tu PC.",
                                 "",
                                 NULL
     };
 
-    static char* list[] = { "Unmount", NULL };
+    static char* list[] = { "Desmonta", NULL };
 
     for (;;)
     {
@@ -393,7 +393,7 @@ int confirm_selection(const char* title, const char* confirm)
     if (0 == stat("/sdcard/clockworkmod/.no_confirm", &info))
         return 1;
 
-    char* confirm_headers[]  = {  title, "  THIS CAN NOT BE UNDONE.", "", NULL };
+    char* confirm_headers[]  = {  title, "  ESTO NO PUEDE SER REVERTIDO.", "", NULL };
     char* items[] = { "No",
                       "No",
                       "No",
@@ -401,7 +401,7 @@ int confirm_selection(const char* title, const char* confirm)
                       "No",
                       "No",
                       "No",
-                      confirm, //" Yes -- wipe partition",   // [7
+                      confirm, //" Si -- wipe particion",   // [7
                       "No",
                       "No",
                       "No",
@@ -417,7 +417,7 @@ int confirm_selection(const char* title, const char* confirm)
 
 int format_unknown_device(const char *device, const char* path, const char *fs_type)
 {
-    LOGI("Formatting unknown device.\n");
+    LOGI("Formateando dispositivo desconocido.\n");
 
     // device may simply be a name, like "system"
     if (device[0] != '/')
@@ -430,25 +430,25 @@ int format_unknown_device(const char *device, const char* path, const char *fs_t
         Volume *vol = volume_for_path("/sd-ext");
         if (vol == NULL || 0 != stat(vol->device, &st))
         {
-            ui_print("No app2sd partition found. Skipping format of /sd-ext.\n");
+            ui_print("No existe particion app2sd. Evitando formateo de /sd-ext.\n");
             return 0;
         }
     }
 
     if (NULL != fs_type) {
         if (strcmp("ext3", fs_type) == 0) {
-            LOGI("Formatting ext3 device.\n");
+            LOGI("Formateando dispositivo ext3.\n");
             if (0 != ensure_path_unmounted(path)) {
-                LOGE("Error while unmounting %s.\n", path);
+                LOGE("Error mientras se desmonta %s.\n", path);
                 return -12;
             }
             return format_ext3_device(device);
         }
 
         if (strcmp("ext2", fs_type) == 0) {
-            LOGI("Formatting ext2 device.\n");
+            LOGI("Formateando dispositivo ext2.\n");
             if (0 != ensure_path_unmounted(path)) {
-                LOGE("Error while unmounting %s.\n", path);
+                LOGE("Error mientras se desmonta %s.\n", path);
                 return -12;
             }
             return format_ext2_device(device);
@@ -457,8 +457,8 @@ int format_unknown_device(const char *device, const char* path, const char *fs_t
 
     if (0 != ensure_path_mounted(path))
     {
-        ui_print("Error mounting %s!\n", path);
-        ui_print("Skipping format...\n");
+        ui_print("Error montando %s!\n", path);
+        ui_print("Evitando formateo...\n");
         return 0;
     }
 
@@ -478,40 +478,40 @@ int format_unknown_device(const char *device, const char* path, const char *fs_t
 
 void show_partition_menu()
 {
-    static char* headers[] = {  "Mounts and Storage Menu",
+    static char* headers[] = {  "Montaje y menu de almacenamiento",
                                 "",
                                 NULL
     };
 
     typedef char* string;
     string mounts[][3] = {
-        { "mount /system", "unmount /system", "/system" },
-        { "mount /data", "unmount /data", "/data" },
-        { "mount /cache", "unmount /cache", "/cache" },
-        { "mount /sdcard", "unmount /sdcard", "/sdcard" },
+        { "monta /system", "desmonta /system", "/system" },
+        { "monta /data", "desmonta /data", "/data" },
+        { "monta /cache", "desmonta /cache", "/cache" },
+        { "monta /sdcard", "desmonta /sdcard", "/sdcard" },
 #ifdef BOARD_HAS_SDCARD_INTERNAL
         { "mount /emmc", "unmount /emmc", "/emmc" },
 #endif
-        { "mount /sd-ext", "unmount /sd-ext", "/sd-ext" }
+        { "monta /sd-ext", "desmonta /sd-ext", "/sd-ext" }
     };
 
     string devices[][2] = {
-        { "format boot", "/boot" },
-        { "format system", "/system" },
-        { "format data", "/data" },
-        { "format cache", "/cache" },
-        { "format sdcard", "/sdcard" },
-        { "format sd-ext", "/sd-ext" },
+        { "formatea boot", "/boot" },
+        { "formatea system", "/system" },
+        { "formatea data", "/data" },
+        { "formatea cache", "/cache" },
+        { "formatea sdcard", "/sdcard" },
+        { "formatea sd-ext", "/sd-ext" },
 #ifdef BOARD_HAS_SDCARD_INTERNAL
-        { "format internal sdcard", "/emmc" }
+        { "Formatea sdcard interna", "/emmc" }
 #endif
     };
 
     const int MOUNTABLE_COUNT = sizeof(mounts) / sizeof(string) / 3;
     const int DEVICE_COUNT = sizeof(devices) / sizeof(string) / 2;
 
-    static char* confirm_format  = "Confirm format?";
-    static char* confirm = "Yes - Format";
+    static char* confirm_format  = "Confirma formateo?";
+    static char* confirm = "Si - Formatea";
 
     for (;;)
     {
@@ -529,7 +529,7 @@ void show_partition_menu()
             options[MOUNTABLE_COUNT + i] = devices[i][0];
         }
 
-        options[MOUNTABLE_COUNT + DEVICE_COUNT] = "mount USB storage";
+        options[MOUNTABLE_COUNT + DEVICE_COUNT] = "Activa almacenamiento USB";
         options[MOUNTABLE_COUNT + DEVICE_COUNT + 1] = NULL;
 
         int chosen_item = get_menu_selection(headers, options, 0, 0);
@@ -544,12 +544,12 @@ void show_partition_menu()
             if (ismounted[chosen_item])
             {
                 if (0 != ensure_path_unmounted(mounts[chosen_item][2]))
-                    ui_print("Error unmounting %s!\n", mounts[chosen_item][2]);
+                    ui_print("Error desmontando %s!\n", mounts[chosen_item][2]);
             }
             else
             {
                 if (0 != ensure_path_mounted(mounts[chosen_item][2]))
-                    ui_print("Error mounting %s!\n", mounts[chosen_item][2]);
+                    ui_print("Error montando %s!\n", mounts[chosen_item][2]);
             }
         }
         else if (chosen_item < MOUNTABLE_COUNT + DEVICE_COUNT)
@@ -557,11 +557,11 @@ void show_partition_menu()
             chosen_item = chosen_item - MOUNTABLE_COUNT;
             if (!confirm_selection(confirm_format, confirm))
                 continue;
-            ui_print("Formatting %s...\n", devices[chosen_item][1]);
+            ui_print("Formateando %s...\n", devices[chosen_item][1]);
             if (0 != format_volume(devices[chosen_item][1]))
-                ui_print("Error formatting %s!\n", devices[chosen_item][1]);
+                ui_print("Error formateando %s!\n", devices[chosen_item][1]);
             else
-                ui_print("Done.\n");
+                ui_print("Finalizado.\n");
         }
     }
 }
@@ -588,7 +588,7 @@ int edify_main(int argc, char** argv) {
 
     FILE* f = fopen(argv[1], "r");
     if (f == NULL) {
-        printf("%s: %s: No such file or directory\n", argv[0], argv[1]);
+        printf("%s: %s: No existe archivo o directorio\n", argv[0], argv[1]);
         return 1;
     }
     char buffer[8192];
@@ -600,7 +600,7 @@ int edify_main(int argc, char** argv) {
     int error_count = 0;
     yy_scan_bytes(buffer, size);
     int error = yyparse(&root, &error_count);
-    printf("parse returned %d; %d errors encountered\n", error, error_count);
+    printf("Analiza %d; %d errores encontrados\n", error, error_count);
     if (error == 0 || error_count > 0) {
 
         //ExprDump(0, root, buffer);
@@ -612,11 +612,11 @@ int edify_main(int argc, char** argv) {
 
         char* result = Evaluate(&state, root);
         if (result == NULL) {
-            printf("result was NULL, message is: %s\n",
+            printf("El resultado fue nulo, el mensaje es: %s\n",
                    (state.errmsg == NULL ? "(NULL)" : state.errmsg));
             free(state.errmsg);
         } else {
-            printf("result is [%s]\n", result);
+            printf("resultado es [%s]\n", result);
         }
     }
     return 0;
@@ -626,7 +626,7 @@ int run_script(char* filename)
 {
     struct stat file_info;
     if (0 != stat(filename, &file_info)) {
-        printf("Error executing stat on file: %s\n", filename);
+        printf("Error al ejecutar el archivo de estadísticas: %s\n", filename);
         return 1;
     }
 
@@ -637,7 +637,7 @@ int run_script(char* filename)
     // supposedly not necessary, but let's be safe.
     script_data[script_len] = '\0';
     fclose(file);
-    LOGI("Running script:\n");
+    LOGI("Ejecutando script:\n");
     LOGI("\n%s\n", script_data);
 
     int ret = run_script_from_buffer(script_data, script_len, filename);
@@ -653,16 +653,16 @@ int run_and_remove_extendedcommand()
     remove(EXTENDEDCOMMAND_SCRIPT);
     int i = 0;
     for (i = 20; i > 0; i--) {
-        ui_print("Waiting for SD Card to mount (%ds)\n", i);
+        ui_print("Esperando a la SD card para montarla (%ds)\n", i);
         if (ensure_path_mounted("/sdcard") == 0) {
-            ui_print("SD Card mounted...\n");
+            ui_print("SD Card mountada...\n");
             break;
         }
         sleep(1);
     }
     remove("/sdcard/clockworkmod/.recoverycheckpoint");
     if (i == 0) {
-        ui_print("Timed out waiting for SD card... continuing anyways.");
+        ui_print("Tiempo agotado esperando por SD card... continuando igualmente.");
     }
 
     sprintf(tmp, "/tmp/%s", basename(EXTENDEDCOMMAND_SCRIPT));
@@ -672,15 +672,15 @@ int run_and_remove_extendedcommand()
 void show_nandroid_advanced_restore_menu()
 {
     if (ensure_path_mounted("/sdcard") != 0) {
-        LOGE ("Can't mount /sdcard\n");
+        LOGE ("No puedo montar /sdcard\n");
         return;
     }
 
-    static char* advancedheaders[] = {  "Choose an image to restore",
+    static char* advancedheaders[] = {  "Escoje una imagen para restaurar",
                                 "",
-                                "Choose an image to restore",
-                                "first. The next menu will",
-                                "you more options.",
+                                "Escoje una imagen para restaurar",
+                                "Primero. En el siguiente menu",
+                                "tienes mas opciones.",
                                 "",
                                 NULL
     };
@@ -689,17 +689,17 @@ void show_nandroid_advanced_restore_menu()
     if (file == NULL)
         return;
 
-    static char* headers[] = {  "Nandroid Advanced Restore",
+    static char* headers[] = {  "Nandroid Restore Avanzado",
                                 "",
                                 NULL
     };
 
-    static char* list[] = { "Restore boot",
-                            "Restore system",
-                            "Restore data",
-                            "Restore cache",
-                            "Restore sd-ext",
-                            "Restore wimax",
+    static char* list[] = { "Restaura boot",
+                            "Restaura system",
+                            "Restaura data",
+                            "Restaura cache",
+                            "Restaura sd-ext",
+                            "Restaura wimax",
                             NULL
     };
     
@@ -709,29 +709,29 @@ void show_nandroid_advanced_restore_menu()
         list[5] = NULL;
     }
 
-    static char* confirm_restore  = "Confirm restore?";
+    static char* confirm_restore  = "Confirma restore?";
 
     int chosen_item = get_menu_selection(headers, list, 0, 0);
     switch (chosen_item)
     {
         case 0:
-            if (confirm_selection(confirm_restore, "Yes - Restore boot"))
+            if (confirm_selection(confirm_restore, "Si - Restaura boot"))
                 nandroid_restore(file, 1, 0, 0, 0, 0, 0);
             break;
         case 1:
-            if (confirm_selection(confirm_restore, "Yes - Restore system"))
+            if (confirm_selection(confirm_restore, "Yes - Restaura system"))
                 nandroid_restore(file, 0, 1, 0, 0, 0, 0);
             break;
         case 2:
-            if (confirm_selection(confirm_restore, "Yes - Restore data"))
+            if (confirm_selection(confirm_restore, "Si - Restaura data"))
                 nandroid_restore(file, 0, 0, 1, 0, 0, 0);
             break;
         case 3:
-            if (confirm_selection(confirm_restore, "Yes - Restore cache"))
+            if (confirm_selection(confirm_restore, "Si - Restaura cache"))
                 nandroid_restore(file, 0, 0, 0, 1, 0, 0);
             break;
         case 4:
-            if (confirm_selection(confirm_restore, "Yes - Restore sd-ext"))
+            if (confirm_selection(confirm_restore, "Si - Restaura sd-ext"))
                 nandroid_restore(file, 0, 0, 0, 0, 1, 0);
             break;
         case 5:
@@ -750,7 +750,7 @@ void show_nandroid_menu()
 
     static char* list[] = { "Backup",
                             "Restore",
-                            "Advanced Restore",
+                            "Restore Avanzado",
                             NULL
     };
 
@@ -793,21 +793,21 @@ void wipe_battery_stats()
 
 void show_advanced_menu()
 {
-    static char* headers[] = {  "Advanced and Debugging Menu",
+    static char* headers[] = {  "Depuracion de nenu avanzados",
                                 "",
                                 NULL
     };
 
-    static char* list[] = { "Reboot Recovery",
+    static char* list[] = { "Reinicia Recovery",
                             "Wipe Dalvik Cache",
-                            "Wipe Battery Stats",
-                            "Report Error",
-                            "Key Test",
+                            "Wipe estadisticas de bateria",
+                            "Reporte de error",
+                            "Test de teclas",
 #ifndef BOARD_HAS_SMALL_RECOVERY
-                            "Partition SD Card",
-                            "Fix Permissions",
+                            "Particionar SD Card",
+                            "Repara permisos",
 #ifdef BOARD_HAS_SDCARD_INTERNAL
-                            "Partition Internal SD Card",
+                            "Particion Interna SD Card",
 #endif
 #endif
                             NULL
@@ -829,7 +829,7 @@ void show_advanced_menu()
                     break;
                 ensure_path_mounted("/sd-ext");
                 ensure_path_mounted("/cache");
-                if (confirm_selection( "Confirm wipe?", "Yes - Wipe Dalvik Cache")) {
+                if (confirm_selection( "Confirma wipe?", "Si - Wipe Dalvik Cache")) {
                     __system("rm -r /data/dalvik-cache");
                     __system("rm -r /cache/dalvik-cache");
                     __system("rm -r /sd-ext/dalvik-cache");
@@ -840,7 +840,7 @@ void show_advanced_menu()
             }
             case 2:
             {
-                if (confirm_selection( "Confirm wipe?", "Yes - Wipe Battery Stats"))
+                if (confirm_selection( "Confirma wipe?", "Si - Wipe estadisticas de bateria"))
                     wipe_battery_stats();
                 break;
             }
@@ -849,15 +849,15 @@ void show_advanced_menu()
                 break;
             case 4:
             {
-                ui_print("Outputting key codes.\n");
-                ui_print("Go back to end debugging.\n");
+                ui_print("Salida de codigos de tecla.\n");
+                ui_print("Vuelve atras y final de debug.\n");
                 int key;
                 int action;
                 do
                 {
                     key = ui_wait_key();
                     action = device_handle_key(key, 1);
-                    ui_print("Key: %d\n", key);
+                    ui_print("Tecla: %d\n", key);
                 }
                 while (action != GO_BACK);
                 break;
@@ -879,8 +879,8 @@ void show_advanced_menu()
                                               "256M",
                                               NULL };
 
-                static char* ext_headers[] = { "Ext Size", "", NULL };
-                static char* swap_headers[] = { "Swap Size", "", NULL };
+                static char* ext_headers[] = { "Tamaño Ext", "", NULL };
+                static char* swap_headers[] = { "Tamaño Swap", "", NULL };
 
                 int ext_size = get_menu_selection(ext_headers, ext_sizes, 0, 0);
                 if (ext_size == GO_BACK)
@@ -898,20 +898,20 @@ void show_advanced_menu()
                 char cmd[PATH_MAX];
                 setenv("SDPATH", sddevice, 1);
                 sprintf(cmd, "sdparted -es %s -ss %s -efs ext3 -s", ext_sizes[ext_size], swap_sizes[swap_size]);
-                ui_print("Partitioning SD Card... please wait...\n");
+                ui_print("Particionando SD Card... espera por favor...\n");
                 if (0 == __system(cmd))
-                    ui_print("Done!\n");
+                    ui_print("Finalizado!\n");
                 else
-                    ui_print("An error occured while partitioning your SD Card. Please see /tmp/recovery.log for more details.\n");
+                    ui_print("Un error a ocurrido mientras particionaba tu SD Card. Por favor revisa /tmp/recovery.log para mas detalles.\n");
                 break;
             }
             case 6:
             {
                 ensure_path_mounted("/system");
                 ensure_path_mounted("/data");
-                ui_print("Fixing permissions...\n");
+                ui_print("Reparando permisos...\n");
                 __system("fix_permissions");
-                ui_print("Done!\n");
+                ui_print("Finalizado!\n");
                 break;
             }
             case 7:
@@ -931,8 +931,8 @@ void show_advanced_menu()
                                               "256M",
                                               NULL };
 
-                static char* ext_headers[] = { "Data Size", "", NULL };
-                static char* swap_headers[] = { "Swap Size", "", NULL };
+                static char* ext_headers[] = { "Tamaño Data", "", NULL };
+                static char* swap_headers[] = { "Tamaño Swap", "", NULL };
 
                 int ext_size = get_menu_selection(ext_headers, ext_sizes, 0, 0);
                 if (ext_size == GO_BACK)
@@ -950,11 +950,11 @@ void show_advanced_menu()
                 char cmd[PATH_MAX];
                 setenv("SDPATH", sddevice, 1);
                 sprintf(cmd, "sdparted -es %s -ss %s -efs ext3 -s", ext_sizes[ext_size], swap_sizes[swap_size]);
-                ui_print("Partitioning Internal SD Card... please wait...\n");
+                ui_print("Particionando SD Card interna... por favor espera...\n");
                 if (0 == __system(cmd))
-                    ui_print("Done!\n");
+                    ui_print("Finalizado!\n");
                 else
-                    ui_print("An error occured while partitioning your Internal SD Card. Please see /tmp/recovery.log for more details.\n");
+                    ui_print("Un error a ocurrido mientras particionaba tu SD card interna. Por favor revisa /tmp/recovery.log para mas detalles.\n");
                 break;
             }
         }
@@ -965,7 +965,7 @@ void write_fstab_root(char *path, FILE *file)
 {
     Volume *vol = volume_for_path(path);
     if (vol == NULL) {
-        LOGW("Unable to get recovery.fstab info for %s during fstab generation!\n", path);
+        LOGW("No se puede obtener información para recovery.fstab %s durante regeneracion de fstab!\n", path);
         return;
     }
 
@@ -987,7 +987,7 @@ void create_fstab()
     __system("touch /etc/mtab");
     FILE *file = fopen("/etc/fstab", "w");
     if (file == NULL) {
-        LOGW("Unable to create /etc/fstab!\n");
+        LOGW("No puedo crear /etc/fstab!\n");
         return;
     }
     Volume *vol = volume_for_path("/boot");
@@ -1002,11 +1002,11 @@ void create_fstab()
     write_fstab_root("/sdcard", file);
     write_fstab_root("/sd-ext", file);
     fclose(file);
-    LOGI("Completed outputting fstab.\n");
+    LOGI("Completada salida fstab.\n");
 }
 
 int bml_check_volume(const char *path) {
-    ui_print("Checking %s...\n", path);
+    ui_print("Comprobando %s...\n", path);
     ensure_path_unmounted(path);
     if (0 == ensure_path_mounted(path)) {
         ensure_path_unmounted(path);
@@ -1015,7 +1015,7 @@ int bml_check_volume(const char *path) {
     
     Volume *vol = volume_for_path(path);
     if (vol == NULL) {
-        LOGE("Unable process volume! Skipping...\n");
+        LOGE("Imposible procesar volumen! Evitando...\n");
         return 0;
     }
     
@@ -1036,7 +1036,7 @@ void process_volumes() {
     if (device_flash_type() != BML)
         return;
 
-    ui_print("Checking for ext4 partitions...\n");
+    ui_print("Comprobando particiones ext4...\n");
     int ret = 0;
     ret = bml_check_volume("/system");
     ret |= bml_check_volume("/data");
@@ -1045,7 +1045,7 @@ void process_volumes() {
     ret |= bml_check_volume("/cache");
     
     if (ret == 0) {
-        ui_print("Done!\n");
+        ui_print("Finalizado!\n");
         return;
     }
     
@@ -1093,7 +1093,7 @@ int is_path_mounted(const char* path) {
     int result;
     result = scan_mounted_volumes();
     if (result < 0) {
-        LOGE("failed to scan mounted volumes\n");
+        LOGE("Fallo buscando volumenes montados\n");
         return 0;
     }
 
