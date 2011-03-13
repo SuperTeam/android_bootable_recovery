@@ -23,12 +23,12 @@
 char* MENU_HEADERS[] = { NULL };
 
 char* MENU_ITEMS[] = { "Reinicia el sistema ahora",
-                       "Aplica update desde la sdcard",
-                       "Wipe data/reset de fabrica (No formatea la Ext4)",
+                       "Aplica update desde la SD Card",
+                       "Wipe total (No formatea la Ext3/4)",
                        "Wipe particion cache",
-                       "Instala zip desde la sdcard",
-                       "Backup and restore",
-                       "Montar y USB",
+                       "Instala zip desde la SD Card",
+                       "Backup y restore",
+                       "Puntos de Montajes y USB",
                        "Avanzado",
                        "Apagar el telefono",
                        NULL };

@@ -667,7 +667,7 @@ wipe_data(int confirm) {
                           " No",
                           " No",
                           " No",
-                          " Yes -- Borra todos los datos",   // [7]
+                          " Si -- Borra todos los datos",   // [7]
                           " No",
                           " No",
                           " No",
@@ -814,7 +814,7 @@ main(int argc, char **argv) {
     ui_print(EXPAND(RECOVERY_VERSION)"\n");
     load_volume_table();
     process_volumes();
-    LOGI("Procesando argumentps.\n");
+    LOGI("Procesando argumentos.\n");
     get_args(&argc, &argv);
 
     int previous_runs = 0;
