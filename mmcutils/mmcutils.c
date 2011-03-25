@@ -340,13 +340,18 @@ run_exec_process ( char **argv) {
 
 int
 format_ext3_device (const char *device) {
-    // Run mke2fs
+#ifdef BOARD_HAS_LARGE_FILESYSTEM
+    char *const mke2fs[] = {MKE2FS_BIN, "-j", "-q", device, NULL};
+    char *const tune2fs[] = {TUNE2FS_BIN, "-C", "1", device, NULL};
+#else
     char *const mke2fs[] = {MKE2FS_BIN, "-j", device, NULL};
+    char *const tune2fs[] = {TUNE2FS_BIN, "-j", "-C", "1", device, NULL};
+#endif
+    // Run mke2fs
     if(run_exec_process(mke2fs))
         return -1;
 
     // Run tune2fs
-    char *const tune2fs[] = {TUNE2FS_BIN, "-j", "-C", "1", device, NULL};
     if(run_exec_process(tune2fs))
         return -1;
 
@@ -579,18 +584,23 @@ ERROR3:
 
 int cmd_mmc_restore_raw_partition(const char *partition, const char *filename)
 {
-    mmc_scan_partitions();
-    const MmcPartition *p;
-    p = mmc_find_partition_by_name(partition);
-    if (p == NULL)
-        return -1;
-    return mmc_raw_copy(p, filename);
+    if (partition[0] != '/') {
+        mmc_scan_partitions();
+        const MmcPartition *p;
+        p = mmc_find_partition_by_name(partition);
+        if (p == NULL)
+            return -1;
+        return mmc_raw_copy(p, filename);
+    }
+    else {
+        return mmc_raw_dump_internal(filename, partition);
+    }
 }
 
 int cmd_mmc_backup_raw_partition(const char *partition, const char *filename)
 {
-    mmc_scan_partitions();
     if (partition[0] != '/') {
+        mmc_scan_partitions();
         const MmcPartition *p;
         p = mmc_find_partition_by_name(partition);
         if (p == NULL)
@@ -604,13 +614,6 @@ int cmd_mmc_backup_raw_partition(const char *partition, const char *filename)
 
 int cmd_mmc_erase_raw_partition(const char *partition)
 {
-    mmc_scan_partitions();
-    const MmcPartition *p;
-    p = mmc_find_partition_by_name(partition);
-    if (p == NULL)
-        return -1;
-
-    // TODO: implement raw wipe
     return 0;
 }
 
