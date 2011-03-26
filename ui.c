@@ -165,9 +165,12 @@ static void draw_text_line(int row, const char* t) {
   }
 }
 
-#define MENU_TEXT_COLOR 255, 160, 49, 255
-#define NORMAL_TEXT_COLOR 200, 200, 200, 255
-#define HEADER_TEXT_COLOR NORMAL_TEXT_COLOR
+//#define MENU_TEXT_COLOR 255, 160, 49, 255
+#define MENU_TEXT_COLOR 200, 200, 200, 255
+//#define NORMAL_TEXT_COLOR 200, 200, 200, 255
+#define NORMAL_TEXT_COLOR 70, 160, 240, 255
+//#define HEADER_TEXT_COLOR NORMAL_TEXT_COLOR
+#define HEADER_TEXT_COLOR 70, 100, 240, 255
 
 // Redraw everything on the screen.  Does not flip pages.
 // Should only be called with gUpdateMutex locked.
@@ -203,7 +206,7 @@ static void draw_screen_locked(void)
             gr_color(MENU_TEXT_COLOR);
             for (i = menu_show_start + menu_top; i < (menu_show_start + menu_top + j); ++i) {
                 if (i == menu_top + menu_sel) {
-                    gr_color(255, 255, 255, 255);
+                    gr_color(0, 0, 0, 255);
                     draw_text_line(i - menu_show_start , menu[i]);
                     gr_color(MENU_TEXT_COLOR);
                 } else {
@@ -509,7 +512,7 @@ int ui_start_menu(char** headers, char** items, int initial_selection) {
         }
 
         if (gShowBackButton) {
-            strcpy(menu[i], " - +++++Go Back+++++");
+            strcpy(menu[i], " - +++++Atras+++++");
             ++i;
         }
 
