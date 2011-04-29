@@ -16,8 +16,8 @@ LOCAL_SRC_FILES := \
     verifier.c \
     encryptedfs_provisioning.c \
     mounts.c \
-	extendedcommands.c \
-	nandroid.c \
+    extendedcommands.c \
+    nandroid.c \
     reboot.c \
     edifyscripting.c \
     setprop.c
@@ -26,7 +26,7 @@ LOCAL_MODULE := recovery
 
 LOCAL_FORCE_STATIC_EXECUTABLE := true
 
-RECOVERY_VERSION := ClockworkMod Recovery v3.0.2.4
+RECOVERY_VERSION := ClockworkMod Recovery v3.0.2.8
 LOCAL_CFLAGS += -DRECOVERY_VERSION="$(RECOVERY_VERSION)"
 RECOVERY_API_VERSION := 2
 LOCAL_CFLAGS += -DRECOVERY_API_VERSION=$(RECOVERY_API_VERSION)
@@ -57,7 +57,12 @@ LOCAL_STATIC_LIBRARIES += libext4_utils libz
 LOCAL_STATIC_LIBRARIES += libminzip libunz libmincrypt
 
 LOCAL_STATIC_LIBRARIES += libedify libbusybox libclearsilverregex libmkyaffs2image libunyaffs liberase_image libdump_image libflash_image
-LOCAL_STATIC_LIBRARIES += libflashutils libmtdutils libmmcutils libbmlutils
+
+LOCAL_STATIC_LIBRARIES += libflashutils libmtdutils libmmcutils libbmlutils 
+
+ifeq ($(BOARD_USES_BML_OVER_MTD),true)
+LOCAL_STATIC_LIBRARIES += libbml_over_mtd
+endif
 
 LOCAL_STATIC_LIBRARIES += libminui libpixelflinger_static libpng libcutils
 LOCAL_STATIC_LIBRARIES += libstdc++ libc
