@@ -68,17 +68,32 @@ static int get_framebuffer(GGLSurface *fb)
         return -1;
     }
 
+    if (ioctl(fd, FBIOGET_VSCREENINFO, &vi) < 0) {
+        perror("failed to get fb0 info");
+        close(fd);
+        return -1;
+    }
+
+    if (vi.bits_per_pixel != 16)
+    {
+        vi.bits_per_pixel = 16;
+        if (ioctl(fd, FBIOPUT_VSCREENINFO, &vi) < 0) {
+            perror("failed to put fb0 info");
+            close(fd);
+            return -1;
+        }
+        if (ioctl(fd, FBIOGET_VSCREENINFO, &vi) < 0) {
+            perror("failed to get fb0 info");
+            close(fd);
+            return -1;
+        }
+    }
     if (ioctl(fd, FBIOGET_FSCREENINFO, &fi) < 0) {
         perror("failed to get fb0 info");
         close(fd);
         return -1;
     }
 
-    if (ioctl(fd, FBIOGET_VSCREENINFO, &vi) < 0) {
-        perror("failed to get fb0 info");
-        close(fd);
-        return -1;
-    }
 
     bits = mmap(0, fi.smem_len, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
     if (bits == MAP_FAILED) {
@@ -90,29 +105,18 @@ static int get_framebuffer(GGLSurface *fb)
     fb->version = sizeof(*fb);
     fb->width = vi.xres;
     fb->height = vi.yres;
-#ifdef BOARD_HAS_JANKY_BACKBUFFER
-    fb->stride = fi.line_length/2;
-#else
-    fb->stride = vi.xres;
-#endif
+    fb->stride = fi.line_length/2; /* stride is the number of pixels until the data of next row, >= xres */;
     fb->data = bits;
     fb->format = GGL_PIXEL_FORMAT_RGB_565;
-    memset(fb->data, 0, vi.yres * vi.xres * 2);
 
     fb++;
 
     fb->version = sizeof(*fb);
     fb->width = vi.xres;
     fb->height = vi.yres;
-#ifdef BOARD_HAS_JANKY_BACKBUFFER
     fb->stride = fi.line_length/2;
     fb->data = (void*) (((unsigned) bits) + vi.yres * fi.line_length);
-#else
-    fb->stride = vi.xres;
-    fb->data = (void*) (((unsigned) bits) + vi.yres * vi.xres * 2);
-#endif
     fb->format = GGL_PIXEL_FORMAT_RGB_565;
-    memset(fb->data, 0, vi.yres * vi.xres * 2);
 
     return fd;
 }
@@ -302,6 +306,7 @@ int gr_init(void)
     gr_active_fb = 0;
     set_active_framebuffer(0);
     gl->colorBuffer(gl, &gr_mem_surface);
+
 
     gl->activeTexture(gl, 0);
     gl->enable(gl, GGL_BLEND);
