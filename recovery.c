@@ -685,7 +685,8 @@ wipe_data(int confirm) {
         erase_volume("/datadata");
     }
     erase_volume("/sd-ext");
-    erase_volume("/sdcard/.android_secure");
+    // it hangs??? and android_secure is not a formattable volume
+    // erase_volume("/sdcard/.android_secure");
     ui_print("Data wipe complete.\n");
 }
 
