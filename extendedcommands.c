@@ -466,10 +466,16 @@ int format_unknown_device(const char *device, const char* path, const char *fs_t
     }
 
     static char tmp[PATH_MAX];
-    sprintf(tmp, "rm -rf %s/*", path);
-    __system(tmp);
-    sprintf(tmp, "rm -rf %s/.*", path);
-    __system(tmp);
+    if (strcmp(path, "/data") == 0) {
+        sprintf(tmp, "cd /data ; for f in $(ls -a | grep -v ^media$); do rm -rf $f; done");
+        __system(tmp);
+    }
+    else {
+        sprintf(tmp, "rm -rf %s/*", path);
+        __system(tmp);
+        sprintf(tmp, "rm -rf %s/.*", path);
+        __system(tmp);
+    }
 
     ensure_path_unmounted(path);
     return 0;
@@ -494,7 +500,7 @@ int is_safe_to_format(char* name)
 {
     char str[255];
     char* partition;
-    property_get("ro.cwm.forbid_format", str, "/misc,/radio,/bootloader,/recovery");
+    property_get("ro.cwm.forbid_format", str, "/misc,/radio,/bootloader,/recovery,/efs");
 
     partition = strtok(str, ", ");
     while (partition != NULL) {
@@ -1099,7 +1105,11 @@ int bml_check_volume(const char *path) {
 
 void process_volumes() {
     create_fstab();
-    
+
+    if (is_data_media()) {
+        setup_data_media();
+    }
+
     return;
 
     // dead code.
