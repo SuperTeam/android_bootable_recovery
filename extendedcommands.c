@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/reboot.h>
+#include <reboot/reboot.h>
 #include <sys/types.h>
 #include <time.h>
 #include <unistd.h>
@@ -491,7 +492,7 @@ int is_safe_to_format(char* name)
 {
     char str[255];
     char* partition;
-    property_get("ro.cwm.forbid_format", str, "/misc,/radio,/bootloader,/recovery");
+    property_get("ro.cwm.forbid_format", str, "/misc,/radio,/bootloader,/recovery,/efs");
 
     partition = strtok(str, ", ");
     while (partition != NULL) {
@@ -885,10 +886,7 @@ void show_advanced_menu()
         switch (chosen_item)
         {
             case 0:
-#ifdef TARGET_RECOVERY_PRE_COMMAND
-                __system( TARGET_RECOVERY_PRE_COMMAND );
-#endif
-                __reboot(LINUX_REBOOT_MAGIC1, LINUX_REBOOT_MAGIC2, LINUX_REBOOT_CMD_RESTART2, "recovery");
+                reboot_wrapper("recovery");
                 break;
             case 1:
             {
@@ -1096,7 +1094,11 @@ int bml_check_volume(const char *path) {
 
 void process_volumes() {
     create_fstab();
-    
+
+    if (is_data_media()) {
+        setup_data_media();
+    }
+
     return;
 
     // dead code.
