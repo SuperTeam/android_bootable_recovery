@@ -414,8 +414,7 @@ int format_unknown_device(const char *device, const char* path, const char *fs_t
 {
     LOGI("Formateando dispositivo desconocido.\n");
 
-    // device may simply be a name, like "system"
-    if (get_flash_type(fs_type) != UNSUPPORTED)
+    if (fs_type != NULL && get_flash_type(fs_type) != UNSUPPORTED)
         return erase_raw_partition(fs_type, device);
 
     // if this is SDEXT:, don't worry about it if it does not exist.
@@ -886,7 +885,10 @@ void show_advanced_menu()
         switch (chosen_item)
         {
             case 0:
-                reboot_wrapper("recovery");
+#ifdef TARGET_RECOVERY_PRE_COMMAND
+                __system(TARGET_RECOVERY_PRE_COMMAND);
+#endif
+                __reboot(LINUX_REBOOT_MAGIC1, LINUX_REBOOT_MAGIC2, LINUX_REBOOT_CMD_RESTART2, "recovery");
                 break;
             case 1:
             {
