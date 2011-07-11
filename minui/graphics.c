@@ -68,17 +68,32 @@ static int get_framebuffer(GGLSurface *fb)
         return -1;
     }
 
+    if (ioctl(fd, FBIOGET_VSCREENINFO, &vi) < 0) {
+        perror("failed to get fb0 info");
+        close(fd);
+        return -1;
+    }
+
+    if (vi.bits_per_pixel != 16)
+    {
+        vi.bits_per_pixel = 16;
+        if (ioctl(fd, FBIOPUT_VSCREENINFO, &vi) < 0) {
+            perror("failed to put fb0 info");
+            close(fd);
+            return -1;
+        }
+        if (ioctl(fd, FBIOGET_VSCREENINFO, &vi) < 0) {
+            perror("failed to get fb0 info");
+            close(fd);
+            return -1;
+        }
+    }
     if (ioctl(fd, FBIOGET_FSCREENINFO, &fi) < 0) {
         perror("failed to get fb0 info");
         close(fd);
         return -1;
     }
 
-    if (ioctl(fd, FBIOGET_VSCREENINFO, &vi) < 0) {
-        perror("failed to get fb0 info");
-        close(fd);
-        return -1;
-    }
 
     bits = mmap(0, fi.smem_len, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
     if (bits == MAP_FAILED) {
@@ -302,6 +317,7 @@ int gr_init(void)
     gr_active_fb = 0;
     set_active_framebuffer(0);
     gl->colorBuffer(gl, &gr_mem_surface);
+
 
     gl->activeTexture(gl, 0);
     gl->enable(gl, GGL_BLEND);
