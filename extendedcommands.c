@@ -82,8 +82,8 @@ char* INSTALL_MENU_ITEMS[] = {  "Aplica /sdcard/update.zip",
                                 "Cambia verificacion de firma",
                                 "Cambia control de scripts",
                                 NULL };
-#define ITEM_APPLY_SDCARD     0
-#define ITEM_CHOOSE_ZIP       1
+#define ITEM_CHOOSE_ZIP       0
+#define ITEM_APPLY_SDCARD     1
 #define ITEM_SIG_CHECK        2
 #define ITEM_ASSERTS          3
 
@@ -867,6 +867,7 @@ void show_advanced_menu()
                             "Wipe estadisticas de bateria",
                             "Reporte de error",
                             "Test de teclas",
+                            "Visualiza log",
 #ifndef BOARD_HAS_SMALL_RECOVERY
                             "Particionar SD Card",
                             "Repara permisos",
@@ -885,8 +886,10 @@ void show_advanced_menu()
         switch (chosen_item)
         {
             case 0:
+            {
                 reboot_wrapper("recovery");
                 break;
+            }
             case 1:
             {
                 if (0 != ensure_path_mounted("/data"))
@@ -927,6 +930,11 @@ void show_advanced_menu()
                 break;
             }
             case 5:
+            {
+                ui_printlogtail(12);
+                break;
+            }
+            case 6:
             {
                 static char* ext_sizes[] = { "128M",
                                              "256M",
@@ -969,7 +977,7 @@ void show_advanced_menu()
                     ui_print("Un error a ocurrido mientras particionaba tu SD Card. Por favor revisa /tmp/recovery.log para mas detalles.\n");
                 break;
             }
-            case 6:
+            case 7:
             {
                 ensure_path_mounted("/system");
                 ensure_path_mounted("/data");
@@ -978,7 +986,7 @@ void show_advanced_menu()
                 ui_print("Finalizado!\n");
                 break;
             }
-            case 7:
+            case 8:
             {
                 static char* ext_sizes[] = { "128M",
                                              "256M",
