@@ -82,8 +82,13 @@ char* INSTALL_MENU_ITEMS[] = {  "Aplica /sdcard/update.zip",
                                 "Cambia verificacion de firma",
                                 "Cambia control de scripts",
                                 NULL };
+#ifndef BOARD_HAS_SDCARD_REV
+#define ITEM_APPLY_SDCARD     0
+#define ITEM_CHOOSE_ZIP       1
+#else
 #define ITEM_CHOOSE_ZIP       0
 #define ITEM_APPLY_SDCARD     1
+#endif
 #define ITEM_SIG_CHECK        2
 #define ITEM_ASSERTS          3
 
