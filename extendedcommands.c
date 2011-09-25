@@ -40,6 +40,7 @@
 #include "flashutils/flashutils.h"
 #include "edify/expr.h"
 #include <libgen.h>
+#include "mtdutils/mtdutils.h"
 
 
 int signature_check_enabled = 1;
@@ -77,10 +78,11 @@ int install_zip(const char* packagefilepath)
     return 0;
 }
 
-char* INSTALL_MENU_ITEMS[] = {  "Aplica /sdcard/update.zip",
-                                "Escoje zip desde la sdcard",
-                                "Cambia verificacion de firma",
-                                "Cambia control de scripts",
+char* INSTALL_MENU_ITEMS[] = {  "choose zip from sdcard",
+                                "apply /sdcard/update.zip",
+                                "toggle signature verification",
+                                "toggle script asserts",
+                                "choose zip from internal sdcard",
                                 NULL };
 #ifndef BOARD_HAS_SDCARD_REV
 #define ITEM_APPLY_SDCARD     0
@@ -91,6 +93,7 @@ char* INSTALL_MENU_ITEMS[] = {  "Aplica /sdcard/update.zip",
 #endif
 #define ITEM_SIG_CHECK        2
 #define ITEM_ASSERTS          3
+#define ITEM_CHOOSE_ZIP_INT   4
 
 void show_install_update_menu()
 {
@@ -98,6 +101,10 @@ void show_install_update_menu()
                                 "",
                                 NULL
     };
+    
+    if (volume_for_path("/emmc") == NULL)
+        INSTALL_MENU_ITEMS[ITEM_CHOOSE_ZIP_INT] = NULL;
+    
     for (;;)
     {
         int chosen_item = get_menu_selection(headers, INSTALL_MENU_ITEMS, 0, 0);
@@ -116,7 +123,10 @@ void show_install_update_menu()
                 break;
             }
             case ITEM_CHOOSE_ZIP:
-                show_choose_zip_menu();
+                show_choose_zip_menu("/sdcard/");
+                break;
+            case ITEM_CHOOSE_ZIP_INT:
+                show_choose_zip_menu("/emmc/");
                 break;
             default:
                 return;
@@ -306,10 +316,15 @@ char* choose_file_menu(const char* directory, const char* fileExtensionOrDirecto
     return return_value;
 }
 
-void show_choose_zip_menu()
+void show_choose_zip_menu(const char *mount_point)
 {
+<<<<<<< HEAD
     if (ensure_path_mounted("/sdcard") != 0) {
         LOGE ("No puedo montar /sdcard\n");
+=======
+    if (ensure_path_mounted(mount_point) != 0) {
+        LOGE ("Can't mount %s\n", mount_point);
+>>>>>>> 95fb821c19ab13574732ab6b03df0bc597598efb
         return;
     }
 
@@ -318,7 +333,7 @@ void show_choose_zip_menu()
                                 NULL
     };
 
-    char* file = choose_file_menu("/sdcard/", ".zip", headers);
+    char* file = choose_file_menu(mount_point, ".zip", headers);
     if (file == NULL)
         return;
     static char* confirm_install  = "Confirma instalacion?";
@@ -414,6 +429,70 @@ int confirm_selection(const char* title, const char* confirm)
 #define MKE2FS_BIN      "/sbin/mke2fs"
 #define TUNE2FS_BIN     "/sbin/tune2fs"
 #define E2FSCK_BIN      "/sbin/e2fsck"
+
+int format_device(const char *device, const char *path, const char *fs_type) {
+    Volume* v = volume_for_path(path);
+    if (v == NULL) {
+        // no /sdcard? let's assume /data/media
+        if (strstr(path, "/sdcard") == path && is_data_media()) {
+            return format_unknown_device(NULL, path, NULL);
+        }
+        // silent failure for sd-ext
+        if (strcmp(path, "/sd-ext") == 0)
+            return -1;
+        LOGE("unknown volume \"%s\"\n", path);
+        return -1;
+    }
+    if (strcmp(fs_type, "ramdisk") == 0) {
+        // you can't format the ramdisk.
+        LOGE("can't format_volume \"%s\"", path);
+        return -1;
+    }
+
+    if (strcmp(v->mount_point, path) != 0) {
+        return format_unknown_device(v->device, path, NULL);
+    }
+
+    if (ensure_path_unmounted(path) != 0) {
+        LOGE("format_volume failed to unmount \"%s\"\n", v->mount_point);
+        return -1;
+    }
+
+    if (strcmp(fs_type, "yaffs2") == 0 || strcmp(fs_type, "mtd") == 0) {
+        mtd_scan_partitions();
+        const MtdPartition* partition = mtd_find_partition_by_name(device);
+        if (partition == NULL) {
+            LOGE("format_volume: no MTD partition \"%s\"\n", device);
+            return -1;
+        }
+
+        MtdWriteContext *write = mtd_write_partition(partition);
+        if (write == NULL) {
+            LOGW("format_volume: can't open MTD \"%s\"\n", device);
+            return -1;
+        } else if (mtd_erase_blocks(write, -1) == (off_t) -1) {
+            LOGW("format_volume: can't erase MTD \"%s\"\n", device);
+            mtd_write_close(write);
+            return -1;
+        } else if (mtd_write_close(write)) {
+            LOGW("format_volume: can't close MTD \"%s\"\n",device);
+            return -1;
+        }
+        return 0;
+    }
+
+    if (strcmp(fs_type, "ext4") == 0) {
+        reset_ext4fs_info();
+        int result = make_ext4fs(device, NULL, NULL, 0, 0, 0);
+        if (result != 0) {
+            LOGE("format_volume: make_extf4fs failed on %s\n", device);
+            return -1;
+        }
+        return 0;
+    }
+
+    return format_unknown_device(device, path, fs_type);
+}
 
 int format_unknown_device(const char *device, const char* path, const char *fs_type)
 {
@@ -635,109 +714,6 @@ void show_partition_menu()
 
 }
 
-#define EXTENDEDCOMMAND_SCRIPT "/cache/recovery/extendedcommand"
-
-int extendedcommand_file_exists()
-{
-    struct stat file_info;
-    return 0 == stat(EXTENDEDCOMMAND_SCRIPT, &file_info);
-}
-
-int edify_main(int argc, char** argv) {
-    load_volume_table();
-    process_volumes();
-    RegisterBuiltins();
-    RegisterRecoveryHooks();
-    FinishRegistration();
-
-    if (argc != 2) {
-        printf("edify <filename>\n");
-        return 1;
-    }
-
-    FILE* f = fopen(argv[1], "r");
-    if (f == NULL) {
-        printf("%s: %s: No existe archivo o directorio\n", argv[0], argv[1]);
-        return 1;
-    }
-    char buffer[8192];
-    int size = fread(buffer, 1, 8191, f);
-    fclose(f);
-    buffer[size] = '\0';
-
-    Expr* root;
-    int error_count = 0;
-    yy_scan_bytes(buffer, size);
-    int error = yyparse(&root, &error_count);
-    printf("Analiza %d; %d errores encontrados\n", error, error_count);
-    if (error == 0 || error_count > 0) {
-
-        //ExprDump(0, root, buffer);
-
-        State state;
-        state.cookie = NULL;
-        state.script = buffer;
-        state.errmsg = NULL;
-
-        char* result = Evaluate(&state, root);
-        if (result == NULL) {
-            printf("El resultado fue nulo, el mensaje es: %s\n",
-                   (state.errmsg == NULL ? "(NULL)" : state.errmsg));
-            free(state.errmsg);
-        } else {
-            printf("resultado es [%s]\n", result);
-        }
-    }
-    return 0;
-}
-
-int run_script(char* filename)
-{
-    struct stat file_info;
-    if (0 != stat(filename, &file_info)) {
-        printf("Error al ejecutar el archivo de estadísticas: %s\n", filename);
-        return 1;
-    }
-
-    int script_len = file_info.st_size;
-    char* script_data = (char*)malloc(script_len + 1);
-    FILE *file = fopen(filename, "rb");
-    fread(script_data, script_len, 1, file);
-    // supposedly not necessary, but let's be safe.
-    script_data[script_len] = '\0';
-    fclose(file);
-    LOGI("Ejecutando script:\n");
-    LOGI("\n%s\n", script_data);
-
-    int ret = run_script_from_buffer(script_data, script_len, filename);
-    free(script_data);
-    return ret;
-}
-
-int run_and_remove_extendedcommand()
-{
-    char tmp[PATH_MAX];
-    sprintf(tmp, "cp %s /tmp/%s", EXTENDEDCOMMAND_SCRIPT, basename(EXTENDEDCOMMAND_SCRIPT));
-    __system(tmp);
-    remove(EXTENDEDCOMMAND_SCRIPT);
-    int i = 0;
-    for (i = 20; i > 0; i--) {
-        ui_print("Esperando a la SD card para montarla (%ds)\n", i);
-        if (ensure_path_mounted("/sdcard") == 0) {
-            ui_print("SD Card mountada...\n");
-            break;
-        }
-        sleep(1);
-    }
-    remove("/sdcard/clockworkmod/.recoverycheckpoint");
-    if (i == 0) {
-        ui_print("Tiempo agotado esperando por SD card... continuando igualmente.");
-    }
-
-    sprintf(tmp, "/tmp/%s", basename(EXTENDEDCOMMAND_SCRIPT));
-    return run_script(tmp);
-}
-
 void show_nandroid_advanced_restore_menu()
 {
     if (ensure_path_mounted("/sdcard") != 0) {
@@ -858,6 +834,7 @@ void wipe_battery_stats()
     ensure_path_mounted("/data");
     remove("/data/system/batterystats.bin");
     ensure_path_unmounted("/data");
+    ui_print("Battery Stats wiped.\n");
 }
 
 void show_advanced_menu()
@@ -905,9 +882,9 @@ void show_advanced_menu()
                     __system("rm -r /data/dalvik-cache");
                     __system("rm -r /cache/dalvik-cache");
                     __system("rm -r /sd-ext/dalvik-cache");
+                    ui_print("Dalvik Cache wiped.\n");
                 }
                 ensure_path_unmounted("/data");
-                ui_print("Dalvik Cache wiped.\n");
                 break;
             }
             case 2:
