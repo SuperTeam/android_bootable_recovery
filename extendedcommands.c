@@ -78,22 +78,22 @@ int install_zip(const char* packagefilepath)
     return 0;
 }
 
-char* INSTALL_MENU_ITEMS[] = {  "choose zip from sdcard",
-                                "apply /sdcard/update.zip",
-                                "toggle signature verification",
-                                "toggle script asserts",
-                                "choose zip from internal sdcard",
+char* INSTALL_MENU_ITEMS[] = {  "Aplica /sdcard/update.zip",
+                                "Escoje zip desde la SDCARD Interna",
+                                "Escoje zip desde la SDCARD Externa",
+                                "Cambia verificacion de firma",
+                                "Cambia control de scripts",
                                 NULL };
 #ifndef BOARD_HAS_SDCARD_REV
 #define ITEM_APPLY_SDCARD     0
 #define ITEM_CHOOSE_ZIP       1
 #else
-#define ITEM_CHOOSE_ZIP       0
 #define ITEM_APPLY_SDCARD     1
+#define ITEM_CHOOSE_ZIP       0
 #endif
-#define ITEM_SIG_CHECK        2
-#define ITEM_ASSERTS          3
-#define ITEM_CHOOSE_ZIP_INT   4
+#define ITEM_CHOOSE_ZIP_INT   2
+#define ITEM_SIG_CHECK        3
+#define ITEM_ASSERTS          4
 
 void show_install_update_menu()
 {
@@ -318,13 +318,8 @@ char* choose_file_menu(const char* directory, const char* fileExtensionOrDirecto
 
 void show_choose_zip_menu(const char *mount_point)
 {
-<<<<<<< HEAD
-    if (ensure_path_mounted("/sdcard") != 0) {
-        LOGE ("No puedo montar /sdcard\n");
-=======
     if (ensure_path_mounted(mount_point) != 0) {
         LOGE ("Can't mount %s\n", mount_point);
->>>>>>> 95fb821c19ab13574732ab6b03df0bc597598efb
         return;
     }
 

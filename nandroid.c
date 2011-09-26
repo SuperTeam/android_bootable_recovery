@@ -398,10 +398,6 @@ int nandroid_restore_partition_extended(const char* backup_path, const char* mou
     sprintf(tmp, "%s/%s.img", backup_path, name);
     struct stat file_info;
     if (0 != (ret = statfs(tmp, &file_info))) {
-<<<<<<< HEAD
-        ui_print("%s.img no existe. Evitando restauracion de %s.\n", name, mount_point);
-        return 0;
-=======
         // can't find the backup, it may be the new backup format?
         // iterate through the backup types
         printf("couldn't find default\n");
@@ -441,7 +437,6 @@ int nandroid_restore_partition_extended(const char* backup_path, const char* mou
         // Or of volume does not exist (.android_secure), just rm -rf.
         if (vol == NULL || 0 == strcmp(vol->fs_type, "auto"))
             backup_filesystem = NULL;
->>>>>>> 95fb821c19ab13574732ab6b03df0bc597598efb
     }
 
     ensure_directory(mount_point);
@@ -455,14 +450,8 @@ int nandroid_restore_partition_extended(const char* backup_path, const char* mou
             return ret;
         }
     }
-<<<<<<< HEAD
-    */
-    if (0 != (ret = format_volume(mount_point))) {
-        ui_print("Error mientras formateaba %s!\n", mount_point);
-=======
     else if (0 != (ret = format_device(device, mount_point, backup_filesystem))) {
         ui_print("Error while formatting %s!\n", mount_point);
->>>>>>> 95fb821c19ab13574732ab6b03df0bc597598efb
         return ret;
     }
 
