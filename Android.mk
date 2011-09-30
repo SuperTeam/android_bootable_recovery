@@ -29,7 +29,7 @@ LOCAL_FORCE_STATIC_EXECUTABLE := true
 ifdef I_AM_KOUSH
 RECOVERY_NAME := ClockworkMod Recovery
 else
-RECOVERY_NAME := CWM-based Recovery modificado por SuperTe@m
+RECOVERY_NAME := CWM-based Recovery mod. por SuperTe@m
 endif
 
 RECOVERY_VERSION := $(RECOVERY_NAME) v4.0.1.4
