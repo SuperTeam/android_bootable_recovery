@@ -783,6 +783,13 @@ main(int argc, char **argv) {
             return nandroid_main(argc, argv);
         if (strstr(argv[0], "reboot"))
             return reboot_main(argc, argv);
+#ifdef BOARD_RECOVERY_HANDLES_MOUNT
+        if (strstr(argv[0], "mount") && argc == 2 && !strstr(argv[0], "umount"))
+        {
+            load_volume_table();
+            return ensure_path_mounted(argv[1]);
+        }
+#endif
         if (strstr(argv[0], "poweroff")){
             return reboot_main(argc, argv);
         }
@@ -943,6 +950,9 @@ main(int argc, char **argv) {
     if (status != INSTALL_SUCCESS || ui_text_visible()) {
         prompt_and_wait();
     }
+
+    // If there is a radio image pending, reboot now to install it.
+    maybe_install_firmware_update(send_intent);
 
     // Otherwise, get ready to boot the main system...
     finish_recovery(send_intent);
