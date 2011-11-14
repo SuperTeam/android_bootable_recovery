@@ -541,7 +541,7 @@ int ui_start_menu(char** headers, char** items, int initial_selection) {
         }
 
         if (gShowBackButton) {
-            strcpy(menu[i], " - +++++Atras+++++");
+            strcpy(menu[i], " - +++++Go Back+++++");
             ++i;
         }
 
