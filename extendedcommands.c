@@ -102,10 +102,10 @@ void show_install_update_menu()
                                 "",
                                 NULL
     };
-    
+
     if (volume_for_path("/emmc") == NULL)
         INSTALL_MENU_ITEMS[ITEM_CHOOSE_ZIP_INT] = NULL;
-    
+
     for (;;)
     {
         int chosen_item = get_menu_selection(headers, INSTALL_MENU_ITEMS, 0, 0);
@@ -458,7 +458,7 @@ int format_device(const char *device, const char *path, const char *fs_type) {
         }
         return 0;
     }
- 
+
     if (strcmp(v->mount_point, path) != 0) {
         return format_unknown_device(v->device, path, NULL);
     }
@@ -759,7 +759,7 @@ void show_nandroid_advanced_restore_menu(const char* path)
                             "Restore wimax",
                             NULL
     };
-    
+
     if (0 != get_partition_device("wimax", tmp)) {
         // disable wimax restore option
         list[5] = NULL;
@@ -1106,13 +1106,13 @@ int bml_check_volume(const char *path) {
         ensure_path_unmounted(path);
         return 0;
     }
-    
+
     Volume *vol = volume_for_path(path);
     if (vol == NULL) {
         LOGE("Unable process volume! Skipping...\n");
         return 0;
     }
-    
+
     ui_print("%s may be rfs. Checking...\n", path);
     char tmp[PATH_MAX];
     sprintf(tmp, "mount -t rfs %s %s", vol->device, path);
@@ -1141,12 +1141,12 @@ void process_volumes() {
     if (has_datadata())
         ret |= bml_check_volume("/datadata");
     ret |= bml_check_volume("/cache");
-    
+
     if (ret == 0) {
         ui_print("Done!\n");
         return;
     }
-    
+
     char backup_path[PATH_MAX];
     time_t t = time(NULL);
     char backup_name[PATH_MAX];
